@@ -16,7 +16,8 @@ QUESTIONS_PER_PAGE = 10
 
 def paginate_questions(request,selection):
   page = request.args.get('page',1,type=int)
-  start = 1 if (page <= 0) else (page - 1) * QUESTIONS_PER_PAGE
+  # start = 1 if (page <= 0) else (page - 1) * QUESTIONS_PER_PAGE
+  start = (page - 1) * QUESTIONS_PER_PAGE
   end = start + QUESTIONS_PER_PAGE
   questions = [question.format() for question in selection ]
   current_questions = questions[start:end]
@@ -48,7 +49,7 @@ def create_app(test_config=None):
   Create an endpoint to handle GET requests for all available categories.
   '''
   @app.route('/categories')
-  def get_all_categories():
+  def get_categories():
     # get categories
     categories = Category.query.all()
     categories_dict={}
@@ -207,14 +208,14 @@ def create_app(test_config=None):
   categories in the left column will cause only questions of that 
   category to be shown. 
   '''
-  @app.route('/categories/<int:id>/questions')
-  def questions_by_category():
+  @app.route('/categories/<int:num>/questions')
+  def questions_by_category(num):
     # get category by id
-    category = Question.query.filter_by(id=str(id))
+    category = Category.query.filter_by(id = num).one_or_none()
     # check if category is present
     if category:
       # get all the questions in the categories
-      questions_in_category = Question.query.filter_by(category.id==str(id)).all()
+      questions_in_category = Question.query.filter_by(category = num).all()
       current_questions = paginate_questions(request, questions_in_category)
       return jsonify({
         'success':True,
@@ -254,6 +255,7 @@ def create_app(test_config=None):
       
       random_index= random.randint(0,len(questions_query))
       next_question = questions_query[random_index]
+
       return jsonify({
         'success':True,
         'question':{
@@ -265,6 +267,7 @@ def create_app(test_config=None):
         },
         'previous_question':previous_question
       })
+
     except Exception as e:
       print(e)
       abort(404)
@@ -290,7 +293,15 @@ def create_app(test_config=None):
       'message':"Page not found"
     })
 
-  @app.errorhandler(404)
+  @app.errorhandler(405)
+  def method_not_allowed(error):
+    return jsonify({
+      'success':False,
+      'error':405,
+      'message':"method not allowed"
+    })
+
+  @app.errorhandler(500)
   def internal_server_error(error):
     return jsonify({
       'success':False,
@@ -299,12 +310,29 @@ def create_app(test_config=None):
     })
 
   @app.errorhandler(404)
-  def invalid_method(error):
+  def page_not_found(error):
     return jsonify({
       'success':False,
-      'error':405,
-      'message':"Invalid method"
+      'error':404,
+      'message':"Page not found"
     })
+
+  @app.errorhandler(422)
+  def unproccessable(error):
+    return jsonify({
+      'success':False,
+      'error':422,
+      'message':"Unable to process"
+    })
+
+  @app.errorhandler(403)
+  def forbidden(error):
+    return jsonify({
+      'success':False,
+      'error':403,
+      'message':"Forbidden"
+    })
+
   
   return app
 
