@@ -19,7 +19,7 @@ class QuizView extends Component {
         forceEnd: false
     }
   }
-
+  
   componentDidMount(){
     $.ajax({
       url: `/categories`, //TODO: update request URL
