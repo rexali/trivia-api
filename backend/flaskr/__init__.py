@@ -115,10 +115,11 @@ def create_app(test_config=None):
   @app.route('/questions/<int:id>', methods=['DELETE'])
   def delete_question(id):
     try:
-      question = Question.query.filter_by(id=id).one_or_none()
+      question = Question.query.filter_by(id = id).one_or_none()
       # check if there is question
       if question is None:
         abort(404)
+
       question.delete()
       remaining_question = Question.query.order_by(Question.id).all()
       current_questions = paginate_questions(request,remaining_question)
@@ -142,21 +143,21 @@ def create_app(test_config=None):
   the form will clear and the question will appear at the end of the last page
   of the questions list in the "List" tab.  
   '''
-  @app.route('/question', methods=['POST'])
+  @app.route('/questions', methods=['POST'])
   def add_question():
     # get the questions from the form
     body = request.get_json()
     # get individaual properties
     question = body.get('question',None)
     answer = body.get('answer', None)
-    category = body,get('category', None)
+    category = body.get('category', None)
     difficulty = body.get('difficulty', None)
 
     try:
       # create question object
       question = Question(question=question,answer=answer,category=category, difficulty=difficulty)
       # add data to db
-      question.delete()
+      question.insert()
       # send current questions to update the client 
       selection = Question.query.order_by(Question.id).all()
       current_questions = paginate_questions(request,selection)
@@ -183,20 +184,20 @@ def create_app(test_config=None):
   @app.route('/search', methods=['POST'])
   def search_questions():
     # get post data
-    body = body.get_json()
+    body = request.get_json()
     # get searched term 
     search_term = body.get('search_term')
     # query the db for the questions that match
-    questions = Question.query.filter('%'+search_term+'%').all()
+    questions = Question.query.filter(Question.question.like('%'+search_term+'%')).all()
     # check question found
     if questions:
       current_questions = paginate_questions(request,questions)
       
       return jsonify({
-        'sucess':True,
-        'questions':current_questions,
-        'total_questions':len(questions)
-      })
+      'success':True,
+      'questions':current_questions,
+      'total_questions':len(questions)
+    })
     else:
       abort(404)
 
