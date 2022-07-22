@@ -238,7 +238,7 @@ def create_app(test_config=None):
   one question at a time is displayed, the user is allowed to answer
   and shown whether they were correct or not. 
   '''
-  @app.route('/quiz',methods=['POST'])
+  @app.route('/quizzes',methods=['POST'])
   def quiz():
     # get post data
     body = request.get_json()
@@ -298,7 +298,7 @@ def create_app(test_config=None):
     return jsonify({
       'success':False,
       'error':405,
-      'message':"method not allowed"
+      'message':"Method not allowed"
     })
 
   @app.errorhandler(500)
@@ -309,29 +309,14 @@ def create_app(test_config=None):
       'message':"Internal server error"
     })
 
-  @app.errorhandler(404)
-  def page_not_found(error):
-    return jsonify({
-      'success':False,
-      'error':404,
-      'message':"Page not found"
-    })
-
   @app.errorhandler(422)
-  def unproccessable(error):
+  def unable_to_process(error):
     return jsonify({
       'success':False,
       'error':422,
       'message':"Unable to process"
     })
 
-  @app.errorhandler(403)
-  def forbidden(error):
-    return jsonify({
-      'success':False,
-      'error':403,
-      'message':"Forbidden"
-    })
 
   
   return app
