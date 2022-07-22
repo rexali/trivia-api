@@ -260,7 +260,7 @@ class TriviaTestCase(unittest.TestCase):
     
     def test_quizzes(self):
         quiz = {
-            'previous_questions':[5],
+            'previous_questions':[4],
             'quiz_category':{
                 'type':'Entertainment',
                 'id':3
