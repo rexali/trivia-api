@@ -88,7 +88,7 @@ GET     '/api/v1.0/categories'
 GET     '/api/v1.0/questions'
 GET     '/api/v1.0/categories/<int:id>/questions'
 POST    '/api/v1.0/questions'
-POST    '/api/v1.0/search'
+POST    '/api/v1.0/questions/search'
 POST    '/api/v1.0/quizzes'
 DELETE  '/api/v1.0/questions/<int:id>'
 
@@ -145,7 +145,7 @@ GET     '/api/v1.0/categories/<int:id>/questions'
     values in string, string, number, number and string respectively
   - The total_questions is a key with its value in string
 
-- Request Arguments: request with an id
+- Request Arguments: request with an id e.g
 
         {
             id:2
@@ -183,7 +183,7 @@ GET     '/api/v1.0/categories/<int:id>/questions'
         }
 
 POST    '/api/v1.0/questions/search'
-- Fetches list of dictionary of questions by searching with a specific term with key and its value
+- Fetches a list of dictionary of questions by searching with a specific term with key and its value
 - Request Arguments: request with search term e.g
         {
             search_term : 'Who is'
@@ -215,7 +215,7 @@ POST    '/api/v1.0/quizzes'
             'question':'What is this',
             },
 
-            'previous_questions':previous_questions
+            'previous_questions':'How are you?
         }
 
 DELETE  '/api/v1.0/questions/<int:id>'
