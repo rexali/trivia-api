@@ -133,7 +133,7 @@ class TriviaTestCase(unittest.TestCase):
     # test delete question
 
     def test_delete_question(self):
-        res = self.client().delete("/api/v1.0/questions/5")
+        res = self.client().delete("/api/v1.0/questions/6")
         data = json.loads(res.data)
         self.assertEqual(res.status_code,200)
         self.assertEqual(data["success"], True)
@@ -202,8 +202,8 @@ class TriviaTestCase(unittest.TestCase):
     # test search
 
     def test_search_question(self):
-        search_term = {'search_term':'Who'}
-        res = self.client().post("/api/v1.0/search",json = search_term )
+        search_term = {'searchTerm':'Who'}
+        res = self.client().post("/api/v1.0/questions/search",json = search_term )
         data = json.loads(res.data)
         self.assertEqual(res.status_code,200)
         self.assertEqual(data["success"], True)
@@ -219,7 +219,7 @@ class TriviaTestCase(unittest.TestCase):
 
     def test_search_question_wrong_url(self):
         search_term = {'search_term':'What'}
-        res = self.client().post("/api/v1.0/saerch",json = search_term )
+        res = self.client().post("/api/v1.0/questions/saerch",json = search_term )
         data = json.loads(res.data)
         self.assertEqual(res.status_code,200)
         self.assertEqual(data["success"], False)
@@ -260,7 +260,7 @@ class TriviaTestCase(unittest.TestCase):
     
     def test_quizzes(self):
         quiz = {
-            'previous_questions':[4],
+            'previous_questions':[6],
             'quiz_category':{
                 'type':'Entertainment',
                 'id':3
