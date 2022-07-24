@@ -38,7 +38,7 @@ class TriviaTestCase(unittest.TestCase):
     # test pagination
 
     def test_paginate_questions(self):
-        res = self.client().get("/questions")
+        res = self.client().get("/api/v1.0/questions")
         data = json.loads(res.data)
         self.assertEqual(res.status_code,200)
         self.assertEqual(data["success"], True)
@@ -47,14 +47,14 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(len(data["questions"]))
 
     def test_paginate_questions_wrong_url(self):
-        res = self.client().get("/question")
+        res = self.client().get("/api/v1.0/question")
         data = json.loads(res.data)
         self.assertEqual(res.status_code,200)
         self.assertEqual(data["success"], False)
         self.assertTrue(data["error"], 404)
 
     def test_paginate_questions_wrong_method(self):
-        res = self.client().get("/questions/1")
+        res = self.client().get("/api/v1.0/questions/1")
         data = json.loads(res.data)
         self.assertEqual(res.status_code,200)
         self.assertEqual(data["success"], False)
@@ -64,28 +64,28 @@ class TriviaTestCase(unittest.TestCase):
     # test categories
 
     def test_get_categories(self):
-        res = self.client().get("/categories")
+        res = self.client().get("/api/v1.0/categories")
         data = json.loads(res.data)
         self.assertEqual(res.status_code,200)
         self.assertEqual(data["success"], True)
         self.assertTrue(len(data["categories"]))
 
     def test_get_categories_not_found(self):
-        res = self.client().get("/categories/1")
+        res = self.client().get("/api/v1.0/categories/1")
         data = json.loads(res.data)
         self.assertEqual(res.status_code,200)
         self.assertEqual(data["success"], False)
         self.assertTrue(data["error"], 404)
 
     def test_get_categories_wrong_method(self):
-        res = self.client().post("/categories")
+        res = self.client().post("/api/v1.0/categories")
         data = json.loads(res.data)
         self.assertEqual(res.status_code,200)
         self.assertEqual(data["success"], False)
         self.assertTrue(data["error"], 405)
 
     def test_get_categories_wrong_url(self):
-        res = self.client().post("/categuries")
+        res = self.client().post("/api/v1.0/categuries")
         data = json.loads(res.data)
         self.assertEqual(res.status_code,200)
         self.assertEqual(data["success"], False)
@@ -94,7 +94,7 @@ class TriviaTestCase(unittest.TestCase):
     # test question
 
     def test_get_questions(self):
-        res = self.client().get("/questions")
+        res = self.client().get("/api/v1.0/questions")
         data = json.loads(res.data)
         self.assertEqual(res.status_code,200)
         self.assertEqual(data["success"], True)
@@ -103,28 +103,28 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(len(data["questions"]))
     
     def test_get_question_wrong_url(self):
-        res = self.client().get("/question")
+        res = self.client().get("/api/v1.0/question")
         data = json.loads(res.data)
         self.assertEqual(res.status_code,200)
         self.assertEqual(data["success"], False)
         self.assertTrue(data["error"], 404)
 
     def test_get_question_bad_request(self):
-        res = self.client().get("/questions/?page=0")
+        res = self.client().get("/api/v1.0/questions/?page=0")
         data = json.loads(res.data)
         self.assertEqual(res.status_code,200)
         self.assertEqual(data["success"], False)
         self.assertTrue(data["error"], 404)
 
     def test_get_question_bad_request_2(self):
-        res = self.client().get("/questions/?page=1000")
+        res = self.client().get("/api/v1.0/questions/?page=1000")
         data = json.loads(res.data)
         self.assertEqual(res.status_code,200)
         self.assertEqual(data["success"], False)
         self.assertTrue(data["error"], 400)
 
     def test_get_question_wrong_method(self):
-        res = self.client().post("/questions")
+        res = self.client().post("/api/v1.0/questions")
         data = json.loads(res.data)
         self.assertEqual(res.status_code,200)
         self.assertEqual(data["success"], False)
@@ -132,28 +132,28 @@ class TriviaTestCase(unittest.TestCase):
     
     # test delete question
 
-    # def test_delete_question(self):
-    #     res = self.client().delete("/questions/4")
-    #     data = json.loads(res.data)
-    #     self.assertEqual(res.status_code,200)
-    #     self.assertEqual(data["success"], True)
+    def test_delete_question(self):
+        res = self.client().delete("/api/v1.0/questions/5")
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code,200)
+        self.assertEqual(data["success"], True)
 
     def test_delete_question_not_found(self):
-        res = self.client().delete("/questions/1000")
+        res = self.client().delete("/api/v1.0/questions/1000")
         data = json.loads(res.data)
         self.assertEqual(res.status_code,200)
         self.assertEqual(data["success"], False)
         self.assertTrue(data["error"], 404)
 
     def test_delete_question_wrong_method(self):
-        res = self.client().post("/questions/2")
+        res = self.client().post("/api/v1.0/questions/2")
         data = json.loads(res.data)
         self.assertEqual(res.status_code,200)
         self.assertEqual(data["success"], False)
         self.assertTrue(data["error"], 405)
 
     def test_delete_question_wrong_url(self):
-        res = self.client().delete("/question/2")
+        res = self.client().delete("/api/v1.0/question/2")
         data = json.loads(res.data)
         self.assertEqual(res.status_code,200)
         self.assertEqual(data["success"], False)
@@ -168,7 +168,7 @@ class TriviaTestCase(unittest.TestCase):
             'difficulty':1,
             'category':1
         }
-        res = self.client().post("/questions",json = new_question)
+        res = self.client().post("/api/v1.0/questions",json = new_question)
         data = json.loads(res.data)
         self.assertEqual(res.status_code,200)
         self.assertEqual(data["success"], True)
@@ -180,7 +180,7 @@ class TriviaTestCase(unittest.TestCase):
             'difficulty':1,
             'category':1
         }
-        res = self.client().delete("/questions",json = new_question)
+        res = self.client().delete("/api/v1.0/questions",json = new_question)
         data = json.loads(res.data)
         self.assertEqual(res.status_code,200)
         self.assertEqual(data["success"], False)
@@ -193,7 +193,7 @@ class TriviaTestCase(unittest.TestCase):
             'difficulty':1,
             'category':1
         }
-        res = self.client().post("/question",json = new_question)
+        res = self.client().post("/api/v1.0/question",json = new_question)
         data = json.loads(res.data)
         self.assertEqual(res.status_code,200)
         self.assertEqual(data["success"], False)
@@ -203,7 +203,7 @@ class TriviaTestCase(unittest.TestCase):
 
     def test_search_question(self):
         search_term = {'search_term':'Who'}
-        res = self.client().post("/search",json = search_term )
+        res = self.client().post("/api/v1.0/search",json = search_term )
         data = json.loads(res.data)
         self.assertEqual(res.status_code,200)
         self.assertEqual(data["success"], True)
@@ -211,7 +211,7 @@ class TriviaTestCase(unittest.TestCase):
 
     def test_search_question_wrong_method(self):
         search_term = {'search_term':'What'}
-        res = self.client().get("/search",json = search_term )
+        res = self.client().get("/api/v1.0/questions/search",json = search_term )
         data = json.loads(res.data)
         self.assertEqual(res.status_code,200)
         self.assertEqual(data["success"], False)
@@ -219,7 +219,7 @@ class TriviaTestCase(unittest.TestCase):
 
     def test_search_question_wrong_url(self):
         search_term = {'search_term':'What'}
-        res = self.client().post("/saerch",json = search_term )
+        res = self.client().post("/api/v1.0/saerch",json = search_term )
         data = json.loads(res.data)
         self.assertEqual(res.status_code,200)
         self.assertEqual(data["success"], False)
@@ -228,7 +228,7 @@ class TriviaTestCase(unittest.TestCase):
     # test question by categories
 
     def test_questions_by_category(self):
-        res = self.client().get('/categories/1/questions')
+        res = self.client().get('/api/v1.0/categories/1/questions')
         data = json.loads(res.data)
         self.assertEqual(res.status_code,200)
         self.assertEqual(data["success"], True)
@@ -236,21 +236,21 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['current_category'], 'Science')
 
     def test_questions_by_category_wrong_method(self):
-        res = self.client().post('/categories/1/questions')
+        res = self.client().post('/api/v1.0/categories/1/questions')
         data = json.loads(res.data)
         self.assertEqual(res.status_code,200)
         self.assertEqual(data["success"], False)
         self.assertEqual(data["error"], 405)
     
     def test_questions_by_category_not_found(self):
-        res = self.client().get('/categories/1000/questions')
+        res = self.client().get('/api/v1.0/categories/1000/questions')
         data = json.loads(res.data)
         self.assertEqual(res.status_code,200)
         self.assertEqual(data["success"], False)
         self.assertEqual(data["error"], 404)
 
     def test_questions_by_category_wrong_url(self):
-        res = self.client().get('/categores/1')
+        res = self.client().get('/api/v1.0/categores/1')
         data = json.loads(res.data)
         self.assertEqual(res.status_code,200)
         self.assertEqual(data["success"], False)
@@ -266,7 +266,7 @@ class TriviaTestCase(unittest.TestCase):
                 'id':3
             }
         }
-        res = self.client().post('/quizzes', json = quiz)
+        res = self.client().post('/api/v1.0/quizzes', json = quiz)
         data = json.loads(res.data)
         self.assertEqual(res.status_code,200)
         self.assertEqual(data["success"], True)
@@ -280,7 +280,7 @@ class TriviaTestCase(unittest.TestCase):
                 'id':3
             }
         }
-        res = self.client().get('/quizzes', json = quiz)
+        res = self.client().get('/api/v1.0/quizzes', json = quiz)
         data = json.loads(res.data)
         self.assertEqual(res.status_code,200)
         self.assertEqual(data["success"], False)
@@ -294,7 +294,7 @@ class TriviaTestCase(unittest.TestCase):
                 'id':3
             }
         }
-        res = self.client().get('/quizes', json = quiz)
+        res = self.client().get('/api/v1.0/quizes', json = quiz)
         data = json.loads(res.data)
         self.assertEqual(res.status_code,200)
         self.assertEqual(data["success"], False)

@@ -34,6 +34,11 @@ def create_app(test_config=None):
   '''
   cors = CORS(app, resources={r"/api/*": {"origins":"*"}})
 
+  # @app.route("/")
+  # def hello_world():
+
+  #   return "Hello World!"
+
   '''
   @TODO: Use the after_request decorator to set Access-Control-Allow
   '''
@@ -48,7 +53,7 @@ def create_app(test_config=None):
   @TODO: 
   Create an endpoint to handle GET requests for all available categories.
   '''
-  @app.route('/categories')
+  @app.route('/api/v1.0/categories')
   def get_categories():
     # get categories
     categories = Category.query.all()
@@ -72,7 +77,7 @@ def create_app(test_config=None):
   ten questions per page and pagination at the bottom of the screen for three pages.
   Clicking on the page numbers should update the questions. 
   '''
-  @app.route('/questions')
+  @app.route('/api/v1.0/questions')
   def get_questions():
     try:
       # get all questions
@@ -98,7 +103,7 @@ def create_app(test_config=None):
         'questions':current_questions,
         'total_questions':total_questions,
         'categories':categories_dict,
-        # 'current_category':category.type
+        'current_category':categories_dict,
       })
 
     except Exception as e:
@@ -112,7 +117,7 @@ def create_app(test_config=None):
   TEST: When you click the trash icon next to a question, the question will be removed.
   This removal will persist in the database and when you refresh the page. 
   '''
-  @app.route('/questions/<int:id>', methods=['DELETE'])
+  @app.route('/api/v1.0/questions/<int:id>', methods=['DELETE'])
   def delete_question(id):
     try:
       question = Question.query.filter_by(id = id).one_or_none()
@@ -125,8 +130,8 @@ def create_app(test_config=None):
       current_questions = paginate_questions(request,remaining_question)
       return jsonify({
         'success':True,
-        'question':current_questions,
-        'total_questions':len(remaining_question)
+        # 'question':current_questions,
+        # 'total_questions':len(remaining_question)
       })
 
     except Exception as e:
@@ -143,7 +148,7 @@ def create_app(test_config=None):
   the form will clear and the question will appear at the end of the last page
   of the questions list in the "List" tab.  
   '''
-  @app.route('/questions', methods=['POST'])
+  @app.route('/api/v1.0/questions', methods=['POST'])
   def add_question():
     # get the questions from the form
     body = request.get_json()
@@ -181,14 +186,15 @@ def create_app(test_config=None):
   only question that include that string within their question. 
   Try using the word "title" to start. 
   '''
-  @app.route('/search', methods=['POST'])
+  @app.route('/api/v1.0/questions/search', methods=['POST'])
   def search_questions():
     # get post data
     body = request.get_json()
     # get searched term 
-    search_term = body.get('search_term')
+    search_term = body.get('searchTerm')
     # query the db for the questions that match
-    questions = Question.query.filter(Question.question.like('%'+search_term+'%')).all()
+    # questions = Question.query.filter(Question.question.contains(search_term)).all()
+    questions = Question.query.filter(Question.question.like('%s%s%s'%('%',search_term,'%'))).all()
     # check question found
     if questions:
       current_questions = paginate_questions(request,questions)
@@ -196,7 +202,7 @@ def create_app(test_config=None):
       return jsonify({
       'success':True,
       'questions':current_questions,
-      'total_questions':len(questions)
+      'total_questions':len(questions),
     })
     else:
       abort(404)
@@ -209,14 +215,14 @@ def create_app(test_config=None):
   categories in the left column will cause only questions of that 
   category to be shown. 
   '''
-  @app.route('/categories/<int:num>/questions')
-  def questions_by_category(num):
+  @app.route('/api/v1.0/categories/<int:id>/questions')
+  def questions_by_category(id):
     # get category by id
-    category = Category.query.filter_by(id = num).one_or_none()
+    category = Category.query.filter_by(id = id).one_or_none()
     # check if category is present
     if category:
       # get all the questions in the categories
-      questions_in_category = Question.query.filter_by(category = num).all()
+      questions_in_category = Question.query.filter_by(category = id).all()
       current_questions = paginate_questions(request, questions_in_category)
       return jsonify({
         'success':True,
@@ -239,13 +245,13 @@ def create_app(test_config=None):
   one question at a time is displayed, the user is allowed to answer
   and shown whether they were correct or not. 
   '''
-  @app.route('/quizzes',methods=['POST'])
+  @app.route('/api/v1.0/quizzes',methods=['POST'])
   def quiz():
     # get post data
     body = request.get_json()
     # get the properties
     quiz_category = body.get('quiz_category')
-    previous_question = body.get('previous_question')
+    previous_questions = body.get('previous_question')
 
     try:
       # check
@@ -266,7 +272,7 @@ def create_app(test_config=None):
           'id':next_question.id,
           'question':next_question.question,
         },
-        'previous_question':previous_question
+        'previous_questions':previous_questions
       })
 
     except Exception as e:
