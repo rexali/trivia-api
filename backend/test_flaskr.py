@@ -37,24 +37,23 @@ class TriviaTestCase(unittest.TestCase):
     """
     # test pagination
 
-    def test_paginate_questions(self):
+    def test_get_questions_per_page(self):
         res = self.client().get("/api/v1.0/questions")
         data = json.loads(res.data)
         self.assertEqual(res.status_code,200)
         self.assertEqual(data["success"], True)
         self.assertTrue(data["total_questions"])
-        self.assertTrue(len(data["categories"]))
         self.assertTrue(len(data["questions"]))
 
-    def test_paginate_questions_wrong_url(self):
+    def test_get_questions_per_page_wrong_url(self):
         res = self.client().get("/api/v1.0/question")
         data = json.loads(res.data)
         self.assertEqual(res.status_code,200)
         self.assertEqual(data["success"], False)
         self.assertTrue(data["error"], 404)
 
-    def test_paginate_questions_wrong_method(self):
-        res = self.client().get("/api/v1.0/questions/1")
+    def test_get_questions_per_page_wrong_method(self):
+        res = self.client().get("/api/v1.0/questions/5")
         data = json.loads(res.data)
         self.assertEqual(res.status_code,200)
         self.assertEqual(data["success"], False)
@@ -71,7 +70,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(len(data["categories"]))
 
     def test_get_categories_not_found(self):
-        res = self.client().get("/api/v1.0/categories/1")
+        res = self.client().get("/api/v1.0/categories/4")
         data = json.loads(res.data)
         self.assertEqual(res.status_code,200)
         self.assertEqual(data["success"], False)
@@ -109,15 +108,9 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data["success"], False)
         self.assertTrue(data["error"], 404)
 
-    def test_get_question_bad_request(self):
-        res = self.client().get("/api/v1.0/questions/?page=0")
-        data = json.loads(res.data)
-        self.assertEqual(res.status_code,200)
-        self.assertEqual(data["success"], False)
-        self.assertTrue(data["error"], 404)
 
-    def test_get_question_bad_request_2(self):
-        res = self.client().get("/api/v1.0/questions/?page=1000")
+    def test_get_question_bad_request(self):
+        res = self.client().get("/api/v1.0/questions/?page=1400")
         data = json.loads(res.data)
         self.assertEqual(res.status_code,200)
         self.assertEqual(data["success"], False)
@@ -133,27 +126,27 @@ class TriviaTestCase(unittest.TestCase):
     # test delete question
 
     def test_delete_question(self):
-        res = self.client().delete("/api/v1.0/questions/6")
+        res = self.client().delete("/api/v1.0/questions/8")
         data = json.loads(res.data)
         self.assertEqual(res.status_code,200)
         self.assertEqual(data["success"], True)
 
     def test_delete_question_not_found(self):
-        res = self.client().delete("/api/v1.0/questions/1000")
+        res = self.client().delete("/api/v1.0/questions/8000")
         data = json.loads(res.data)
         self.assertEqual(res.status_code,200)
         self.assertEqual(data["success"], False)
         self.assertTrue(data["error"], 404)
 
     def test_delete_question_wrong_method(self):
-        res = self.client().post("/api/v1.0/questions/2")
+        res = self.client().post("/api/v1.0/questions/6")
         data = json.loads(res.data)
         self.assertEqual(res.status_code,200)
         self.assertEqual(data["success"], False)
         self.assertTrue(data["error"], 405)
 
     def test_delete_question_wrong_url(self):
-        res = self.client().delete("/api/v1.0/question/2")
+        res = self.client().delete("/api/v1.0/question/8")
         data = json.loads(res.data)
         self.assertEqual(res.status_code,200)
         self.assertEqual(data["success"], False)
@@ -236,14 +229,14 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['current_category'], 'Science')
 
     def test_questions_by_category_wrong_method(self):
-        res = self.client().post('/api/v1.0/categories/1/questions')
+        res = self.client().post('/api/v1.0/categories/7/questions')
         data = json.loads(res.data)
         self.assertEqual(res.status_code,200)
         self.assertEqual(data["success"], False)
         self.assertEqual(data["error"], 405)
     
     def test_questions_by_category_not_found(self):
-        res = self.client().get('/api/v1.0/categories/1000/questions')
+        res = self.client().get('/api/v1.0/categories/6000/questions')
         data = json.loads(res.data)
         self.assertEqual(res.status_code,200)
         self.assertEqual(data["success"], False)

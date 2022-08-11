@@ -14,14 +14,19 @@ from models import setup_db, Question, Category
 
 QUESTIONS_PER_PAGE = 10
 
-def paginate_questions(request,selection):
+def get_questions_per_page(request, selection):
+  # get initial page value from the rquest
   page = request.args.get('page',1,type=int)
-  # start = 1 if (page <= 0) else (page - 1) * QUESTIONS_PER_PAGE
-  start = (page - 1) * QUESTIONS_PER_PAGE
-  end = start + QUESTIONS_PER_PAGE
+  # get number of questions on a page
+  number_of_questions_per_page = 1 if (page <= 0) else (page - 1) * QUESTIONS_PER_PAGE
+  # get  number of question for next page
+  number_of_questions_next_page = number_of_questions_per_page + QUESTIONS_PER_PAGE
+  # get all the question from given current question in db
   questions = [question.format() for question in selection ]
-  current_questions = questions[start:end]
-  return current_questions
+  # get the list of page questions
+  page_questions = questions[number_of_questions_per_page:number_of_questions_next_page]
+  # return the current question
+  return page_questions
 
 
 def create_app(test_config=None):
@@ -55,37 +60,40 @@ def create_app(test_config=None):
   '''
   @app.route('/api/v1.0/categories')
   def get_categories():
-    # get categories
-    categories = Category.query.all()
-    categories_dict={}
-    for category in categories:
-      # create dictionary to hold the list
-      categories_dict[category.id]= category.type
-
-    return jsonify({'success':True,'categories':categories_dict})
+    # let us get all categories
+    cats = Category.query.all()
+    # let create dict to hold the list of categories
+    cat_dict={}
+    # loop thru each of the categories
+    for cat in cats:
+      # add each category id and its type to the dictionary
+      cat_dict[cat.id]= cat.type
+      # return the json of categories
+   
+    return jsonify({'success':True,'categories':cat_dict})
 
   '''
   @TODO: 
   Create an endpoint to handle GET requests for questions, 
-  including pagination (every 10 questions). 
+  including get_questions_per_page (every 10 questions). 
   This endpoint should return a list of questions, 
   number of total questions, current category, categories. 
 
 
   TEST: At this point, when you start the application
-  you should see questions and categories generated,
-  ten questions per page and pagination at the bottom of the screen for three pages.
+  you should see que stions and categories generated,
+  ten questions per page and get_questions_per_page at the bottom of the screen for three pages.
   Clicking on the page numbers should update the questions. 
   '''
   @app.route('/api/v1.0/questions')
   def get_questions():
     try:
-      # get all questions
+      # let us get all questions
       questions = Question.query.order_by(Question.id).all()
       # get total number of questions
       total_questions = len(questions)
-      # get questions in a page (10q)
-      current_questions = paginate_questions(request,questions)
+      # get questions in a page
+      current_questions = get_questions_per_page(request,questions)
       # if page not found
       if(len(current_questions)==0):
         abort(404)
@@ -120,18 +128,29 @@ def create_app(test_config=None):
   @app.route('/api/v1.0/questions/<int:id>', methods=['DELETE'])
   def delete_question(id):
     try:
+      # get a question with the given id 
       question = Question.query.filter_by(id = id).one_or_none()
-      # check if there is question
+
+      # check if the question is empty
       if question is None:
+        # then stop operation
         abort(404)
 
-      question.delete()
-      remaining_question = Question.query.order_by(Question.id).all()
-      current_questions = paginate_questions(request,remaining_question)
+      # delete the question that matched the id
+      try:
+        # delete now
+        question.delete()
+        # get the remaining question after deletion fro the db
+        remaining_question = Question.query.order_by(Question.id).all()
+      except Exception as e:
+        print(e)
+      # get the questions to be displayed currentyly on the page
+      current_questions = get_questions_per_page(request, remaining_question)
+
       return jsonify({
         'success':True,
-        # 'question':current_questions,
-        # 'total_questions':len(remaining_question)
+        'question':current_questions,
+        'total_questions':len(remaining_question)
       })
 
     except Exception as e:
@@ -150,27 +169,29 @@ def create_app(test_config=None):
   '''
   @app.route('/api/v1.0/questions', methods=['POST'])
   def add_question():
-    # get the questions from the form
-    body = request.get_json()
-    # get individaual properties
-    question = body.get('question',None)
-    answer = body.get('answer', None)
-    category = body.get('category', None)
-    difficulty = body.get('difficulty', None)
-
+    # get the post data from the form and convert to json
+    form_data = request.get_json()
+    # get individaual properties or form field: questio,answer,category and difficulty
+    question = form_data.get('question')
+    answer = form_data.get('answer')
+    category = form_data.get('category')
+    difficulty = form_data.get('difficulty')
+    # try to create the question object
     try:
-      # create question object
+      # create now
       question = Question(question=question,answer=answer,category=category, difficulty=difficulty)
       # add data to db
       question.insert()
-      # send current questions to update the client 
-      selection = Question.query.order_by(Question.id).all()
-      current_questions = paginate_questions(request,selection)
+      # get resulting questions to update the client 
+      resulting_questions = Question.query.order_by(Question.id).all()
+      # get question to be on the first page
+      current_questions = get_questions_per_page(request,resulting_questions)
+
       return jsonify({
         'success': True,
         'question_id':question.id,
         'questions':current_questions,
-        'total_questions':len(selection)
+        'total_questions':len(resulting_questions)
       })
     except Exception as e:
       print(e)
@@ -188,22 +209,24 @@ def create_app(test_config=None):
   '''
   @app.route('/api/v1.0/questions/search', methods=['POST'])
   def search_questions():
-    # get post data
-    body = request.get_json()
-    # get searched term 
-    search_term = body.get('searchTerm')
-    # query the db for the questions that match
-    # questions = Question.query.filter(Question.question.contains(search_term)).all()
+    # get the form data from the request
+    form_data = request.get_json()
+    # get searched term  from the form data
+    search_term = form_data.get('searchTerm')
+    # query the db for the questions that match with this: 
+    # questions = Question.query.filter(Question.question.contains(search_term)).all() or below code line
     questions = Question.query.filter(Question.question.like('%s%s%s'%('%',search_term,'%'))).all()
     # check question found
     if questions:
-      current_questions = paginate_questions(request,questions)
+      # get the initial page questions
+      current_questions = get_questions_per_page(request,questions)
       
       return jsonify({
       'success':True,
       'questions':current_questions,
       'total_questions':len(questions),
     })
+
     else:
       abort(404)
 
@@ -217,17 +240,19 @@ def create_app(test_config=None):
   '''
   @app.route('/api/v1.0/categories/<int:id>/questions')
   def questions_by_category(id):
-    # get category by id
+    # get a category by its id
     category = Category.query.filter_by(id = id).one_or_none()
     # check if category is present
     if category:
-      # get all the questions in the categories
-      questions_in_category = Question.query.filter_by(category = id).all()
-      current_questions = paginate_questions(request, questions_in_category)
+      # get all the questions with the given id if not empty
+      category_questions = Question.query.filter_by(category = id).all()
+      # get the initial page questions
+      initial_questions = get_questions_per_page(request, category_questions)
+
       return jsonify({
         'success':True,
-        'questions':current_questions,
-        'total_questions':len(questions_in_category),
+        'questions':initial_questions,
+        'total_questions':len(category_questions),
         'current_category':category.type
       })
     # if not category found
@@ -247,21 +272,25 @@ def create_app(test_config=None):
   '''
   @app.route('/api/v1.0/quizzes',methods=['POST'])
   def quiz():
-    # get post data
-    body = request.get_json()
-    # get the properties
-    quiz_category = body.get('quiz_category')
-    previous_questions = body.get('previous_question')
+    # get post data from the form
+    form_data = request.get_json()
+    # get the catgory of the quiz from the form
+    quiz_category = form_data.get('quiz_category')
+    # get the previous questions from the form
+    previous_questions = form_data.get('previous_question')
 
     try:
-      # check
-      if quiz_category['id']==0:
-        questions_query = Question.query.all()
+      # check that quiz category is 0
+      if quiz_category['id'] == 0:
+        # get all the questions if true
+        questions = Question.query.all()
       else:
-        questions_query = Question.query.filter_by(category=quiz_category['id']).all()
-      
-      random_index= random.randint(0,len(questions_query))
-      next_question = questions_query[random_index]
+        # get all the questions non-zero id
+        questions = Question.query.filter_by(category=quiz_category['id']).all()
+      # get random number betw zero and total questions
+      random_number= random.randint(0,len(questions))
+      # get the next questions randomly using random number
+      next_question = questions[random_number]
 
       return jsonify({
         'success':True,
@@ -284,40 +313,51 @@ def create_app(test_config=None):
   Create error handlers for all expected errors 
   including 404 and 422. 
   '''
+
+  # error handlers for 400: Bad request
   @app.errorhandler(400)
-  def bad_request(error):
+  def  bad_request(error):
+
     return jsonify({
       'success':False,
       'error':400,
       'message':"Bad request"
     })
 
+  # error handlers for 404: Page not found
   @app.errorhandler(404)
-  def page_not_found(error):
+  def page_not_found(error): 
+
     return jsonify({
       'success':False,
       'error':404,
       'message':"Page not found"
     })
 
+  # error handlers for 405: Method not allowed
   @app.errorhandler(405)
   def method_not_allowed(error):
+
     return jsonify({
       'success':False,
       'error':405,
       'message':"Method not allowed"
     })
-
+  
+  # error handlers for 500: Internal server error
   @app.errorhandler(500)
   def internal_server_error(error):
+
     return jsonify({
       'success':False,
       'error':500,
       'message':"Internal server error"
     })
 
+  # error handlers for 422: Unable to process
   @app.errorhandler(422)
   def unable_to_process(error):
+
     return jsonify({
       'success':False,
       'error':422,
