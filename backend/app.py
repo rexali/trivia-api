@@ -6,7 +6,9 @@ from models import setup_db, Question, Category
 
 QUESTIONS_PER_PAGE = 10
 
-#  pagination of the question
+# pagination of the question
+
+
 def get_questions_per_page(request, selection):
     # get initial page value from the rquest
     page = request.args.get('page', 1, type=int)
@@ -87,9 +89,6 @@ def create_app(test_config=None):
             total_questions = len(questions)
             # get questions in a page
             current_questions = get_questions_per_page(request, questions)
-            # if page not found
-            if (len(current_questions) == 0):
-                abort(404)
             # get all categories
             categories = Category.query.all()
             # create empty categories dictionary

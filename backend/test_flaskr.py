@@ -14,7 +14,8 @@ class TriviaTestCase(unittest.TestCase):
         self.app = create_app()
         self.client = self.app.test_client
         self.database_name = "trivia_test"
-        # self.database_path = "postgres://{}/{}".format('localhost:5432', self.database_name)
+        # self.database_path = "postgres://{}/{}".
+        # format('localhost:5432', self.database_name)
         self.database_path = "postgresql://{}:{}@{}/{}".format(
             DB_USER, DB_PASSWORD, 'localhost', self.database_name)
 
@@ -33,7 +34,8 @@ class TriviaTestCase(unittest.TestCase):
 
     """
     TODO
-    Write at least one test for each test for successful operation and for expected errors.
+    Write at least one test for each test for successful operation
+    and for expected errors.
     """
     # test pagination
 
@@ -150,7 +152,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data["success"], False)
         self.assertTrue(data["error"], 404)
 
-   # test add question
+    # test add question
 
     def test_add_question(self):
         new_question = {
@@ -194,7 +196,8 @@ class TriviaTestCase(unittest.TestCase):
 
     def test_search_question(self):
         search_term = {'searchTerm': 'Who'}
-        res = self.client().post("/api/v1.0/questions/search", json=search_term)
+        res = self.client().post(
+            "/api/v1.0/questions/search", json=search_term)
         data = json.loads(res.data)
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data["success"], True)
@@ -202,7 +205,8 @@ class TriviaTestCase(unittest.TestCase):
 
     def test_search_question_wrong_method(self):
         search_term = {'search_term': 'What'}
-        res = self.client().get("/api/v1.0/questions/search", json=search_term)
+        res = self.client().get(
+            "/api/v1.0/questions/search", json=search_term)
         data = json.loads(res.data)
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data["success"], False)
@@ -210,7 +214,8 @@ class TriviaTestCase(unittest.TestCase):
 
     def test_search_question_wrong_url(self):
         search_term = {'search_term': 'What'}
-        res = self.client().post("/api/v1.0/questions/saerch", json=search_term)
+        res = self.client().post(
+            "/api/v1.0/questions/saerch", json=search_term)
         data = json.loads(res.data)
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data["success"], False)
